@@ -1,1 +1,28 @@
-a = 1
+#print as a comment
+print("""
+Name: Eunice Olawale
+Username: @eunice
+Email: yunisolawale@gmail.com
+Hobby: Studying music
+Country: Nigeria
+Discipline: Nigeria
+Preferred Language: Python
+GitHub link: https://github.com/Justcodeeunice/hackbio-biocoding-internship
+
+""")
+OR
+
+#organizing info using:
+my_info = {
+    "Name": "Eunice Olawale",
+    "Username": "@eunice",
+    "Email": "Studying music",
+    "Country": "Nigeria",
+    "Discipline": "Microbiology",
+    "Preferred Language": "Python",
+    "GitHub link": "https://github.com/Justcodeeunice/hackbio-biocoding-internship"
+}
+#print the organized info
+print ("personal information:")
+for key, value in my_info.items():
+    print(f"{key}: {value}")
