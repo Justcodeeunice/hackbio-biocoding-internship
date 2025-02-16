@@ -1,3 +1,6 @@
+# 1. Write a function for translating DNA to protein
+
+# Python program to convert DNA to protein
 def translate(seq):
     table = {
         'ATA':'I', 'ATC':'I', 'ATT':'I', 'ATG':'M', 
@@ -17,15 +20,11 @@ def translate(seq):
         'TAC':'Y', 'TAT':'Y', 'TAA':'_', 'TAG':'_', 
         'TGC':'C', 'TGT':'C', 'TGA':'_', 'TGG':'W',
     }
-    protein ="" # This initializes an empty string protein, which will store the translated amino acid sequence.
-    if len(seq)% 3 ==0: #This checks if the DNA sequence length (seq) is a multiple of 3.
-                        #DNA is translated in triplets (codons), so if the length is not a multiple of 3, translation might be incomplete.
-        for i in range (0, len(seq), 3): #This loops through the sequence in steps of 3 (i.e., processes one codon at a time).
-            codon = seq[i:i + 3] #Extracts a 3-letter codon from the DNA sequence.
-            protein+= table.get(codon,"-*-") # "?" means codon doesnt exist, ANY CHARACTER CAN BE USED TO MAKE IT READABLE
-                                             # Looks up the corresponding amino acid from the table (which is a codon-to-amino acid dictionary).
-                                            # If the codon is found in table, the corresponding amino acid is added to protein.
-                                            # If the codon is not found, it adds the placeholder "-*-", indicating an unknown or invalid codon.
+    protein ="" 
+    if len(seq)% 3 ==0: 
+        for i in range (0, len(seq), 3): 
+            codon = seq[i:i + 3]
+            protein+= table.get(codon,"-*-")
     else:
         print("DNA sequence is not multiple of three")
     return protein
@@ -33,6 +32,90 @@ DNA_sequence= "TATXYZTACTAGXYZ" #YOU DONT necessarily need to download the code 
 translate(DNA_sequence)
 ABC = translate(DNA_sequence)
 print(ABC)
+
+
+# 2. Write a function that simulates and generates a logistic population growth curve. Your function should include 2 extra parameters that randomize the length of the lag phase and the exponential phase [See population curve here] . Most living populations follow a logistic population growth. Therefore, your growth curve can be: Population Size vs Time, Cell density vs Time, OD vs Time, CFU vs Time, etc
+Using your function, generate a dataframe with 100 different growth curves.
+
+def logistic_growth(time, K=1500, r=0.5, N0=10, lag_variation=8, exp_variation=12):
+    """
+    Simulate logistic growth with randomized lag and exponential phases.
+    - K: Carrying capacity
+    - r: Growth rate
+    - N0: Initial population
+    - lag_variation: Random delay for lag phase
+    - exp_variation: Random shift for exponential phase
+    """
+    # using linear congruential gnerator method
+    seed = (time * 12345678) % 1000 # create a changing seed
+    lag_time = seed % (lag_variation + 2) # Randomized lag phase duration
+    exp_time = (seed * 3) % (exp_variation + 2) # Randomized exponential duration
+
+    t_adjusted = max(0, time - lag_time) # Ensure time isn't negative
+
+    #Using Taylor series
+    exp_factor = 1 - (r * (t_adjusted - exp_time)) + ((r * (t_adjusted - exp_time)) **2) / 2
+
+    #Logistic growth equation
+    population = K / (1 + ((K - N0) / N0) * exp_factor)
+    return population
+
+# Generate 100 different growth curves
+time_points = [i for i in range(101)] #Time range from 0 to 100
+growth_curves = {}
+
+for i in range(1, 101): #Genearate 100 curves
+    growth_curves[f"Curve_{i}"] = [logistic_growth(t) for t in time_points]
+
+# Print the first 5 time points of the first 3 curves
+for curve, values in list(growth_curves.items())[:5]:
+    print(f"{curve}: {values[:5]}...") #Show the first 5 values for each curve
+
+
+# 3. Write a function for determining the time to reach 80% of the maximum growth; usually the carrying capacity
+
+def time_to_80_percent_max(K, r, N0):
+    """
+    Calculate the time required to reach 80% of the carrying capacity(K)
+    - K: Carrying capacity (maximum population)
+    - r: Growth rate
+    - N0: Initial population size
+    """
+    threshold = 0.8 * K # 80% of the carrying capacity
+    # Solve for time using the logistic growth equation:
+    # P(t) = K / (1 + ((K - N0) / N0) * exp(-r * t))
+    # Rearranged to solve for t:
+    t = (-1 / r) * ((K - N0) / (threshold - N0) -1) 
+    return t 
+K = 1500 # Carrying capacity
+r = 0.5 # Growth rate
+N0 = 10 # Initial population
+  
+time_80 = time_to_80_percent_max(K, r, N0)
+print(f"Time to reach 80% of carrying capacity: {time_80:.2f}")
+
+# 4. Finally, write a function for calculating the hamming distance between your Slack username and twitter/X handle (synthesize if you don’t have one). 
+Feel free to pad it with extra words if they are not of the same length.
+
+#twitter username: yunis_grace
+#slack username: Eunice
+usernames = ["yunis_grace", "EUNICE"]
+for usn1 in usernames:
+    for usn2 in usernames:
+        if usn1 != usn2:
+            print(f"Comparing {usn1} with {usn2}")
+            hamming_distance = sum(usn1 != usn2 for usn1, usn2 in zip(usn1, usn2))
+            print(f"Hamming distance between {usn1} and {usn2}: {hamming_distance}")
+
+Group_members = {
+    "Linkeldn username 1": "Modupe Oyelade",
+    "Linkeldn username 2" : "Eunice Olawale",
+    "Github link 1": "https://codingforbio.slack.com/archives/D08AG3RMX7D/p1739722291167289",
+    "Github link 2": "https://codingforbio.slack.com/archives/C08CABZP42E/p1738945504464919"
+    }
+print ("Group_members:")
+for key, value in Group_members.items():
+    print(f"{key}: {value}")
 
 
 
