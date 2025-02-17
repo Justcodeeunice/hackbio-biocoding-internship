@@ -109,9 +109,11 @@ for usn1 in usernames:
 
 Group_members = {
     "Linkeldn username 1": "Modupe Oyelade",
-    "Linkeldn username 2" : "Eunice Olawale",
-    "Github link 1": "https://codingforbio.slack.com/archives/D08AG3RMX7D/p1739722291167289",
-    "Github link 2": "https://codingforbio.slack.com/archives/C08CABZP42E/p1738945504464919"
+    "Linkeldn username 2": "Eunice Olawale",
+    "Linkeldn username 3": "Oboh jennifer"
+    "Github link 1": "https://github.com/DrModupeO/Hackbio-biocoding-internship",
+    "Github link 2": "https://github.com/Justcodeeunice/hackbio-biocoding-internship/tree/main",
+    "Github link 3": "https://github.com/Aigberinjenny"
     }
 print ("Group_members:")
 for key, value in Group_members.items():
