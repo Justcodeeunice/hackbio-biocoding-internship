@@ -139,3 +139,75 @@ for key, value in Group_members.items():
 
 
 
+
+
+#STAGE 1 IN R
+Solution for 1 in R
+codon_db <- c("UUU"="Phe", "UUC"="Phe","UUA"="Leu", "UUC"="Leu")
+
+test_cd <- "UUAUUAUUAUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCUUCUUCUUCUUC"
+
+translator <- function(inputCodon){
+    
+    split_seq <- strsplit(inputCodon, "")[[1]]
+    #print(split_seq)
+    codon_positions <- seq(1, length(split_seq), 3)
+
+    ribosome_output <- c()
+
+    for(i in codon_positions){
+        curr_nuc <- split_seq[i:(i+2)]
+        curr_nuc <- paste0(curr_nuc[1], curr_nuc[2], curr_nuc[3])
+        #print(curr_nuc)
+        ribosome_output <- c(ribosome_output, codon_db[curr_nuc])
+    }
+
+    return(ribosome_output)
+}
+
+translator(test_cd)
+
+#start coding... 
+
+population_maker <- function(k = 2, x_mid = 5, x){
+
+    solution <- 1/(1 + exp(-k*(x - x_mid)))
+
+    return(solution)
+}
+
+od_600 <- c()
+
+for(i in 0:24){
+    curr_od <- population_maker(k =0.25, x_mid = 10, x = i)
+    od_600 <- c(od_600, curr_od)
+}
+
+#print(length(od_600))
+#print(length(0:24))
+
+plot(x = 0:24, y = od_600)
+
+import math
+
+def population_maker(x , k = 2, x_mid = 5):
+
+    solution = 1/(1 + math.exp(-k*(x-x_mid)))
+
+    return solution
+
+#print(population_maker(k = 2, x_mid = 5, x = 10))
+
+od_600 = []
+
+for i in range(0,24):
+
+    od_600.append(population_maker(x = i, k = 0.5, x_mid = 10))
+
+print(od_600)
+
+import seaborn as sns
+
+sns.lineplot(x = range(0,24), y = od_600)
+
+
