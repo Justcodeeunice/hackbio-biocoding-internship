@@ -1,1 +1,450 @@
+Team Instructions:
+Each Team will work on at least 4 tasks
+Feel free to maintain your team.
+If you prefer to work solo, still go ahead
+If you want to switch teams, please notify your current team before you exit.
+You can now increase your team population to a maximum of 8
+As usual, you can decide to use python or R, even within a team, but:
+you have to submit them differently.
+You have to provide all 4 functions for each language when submitting
+Deadline: Sunday 23rd Feb.
+
+Task Code 2.1:
+Microbiology
+Look at this dataset here.
+This is the description of the dataset . [open in a new tab, not a file to be downloaded]
+Plot all the growth curves of OD600 vs Time for the different Strains with the following instructions
+For each strain, plot a growth curve of the the knock out (-) an knock in (+) strain overlaid on top of each other
+Using your function from last stage, determine the time to reach the carrying capacity for each strain/mutant
+Generate a scatter plot of the time it takes to reach carrying capacity for the knock out and the knock in strains
+Generate a box plot of the time it takes to reach carrying capacity for the knock out and the knock in strains
+Is there a statistical difference in the time it takes the knock out strains to reach their maximum carrying capacity compared to the knock in strains
+What do you see? Explain your observations as comments in your code
+
+Task Code 2.3:
+Botany and Plant Science
+Have a look at this dataset
+Some scientists are trying to engineer mutants for a crop to become resistant to a pesticide
+They compared the metabolic response of the engineered mutants to the metabolic response of the wild type plants
+The took readings after 8 and 24 hours
+Your task
+Calculate the difference in metabolic response (ΔM) between the DMSO treatment from the 24 hours treatment for the wild type and mutants
+Generate a scatter plot showing the difference for ΔM for WT and Mutants
+Fit a line that satifies a y-intercept of 0 and a slope of 1.
+Using a residual cut off of your choice (calculated a the difference between the fitted line and each point) calculate the residual of each point on the scatter plot
+Color metabolites that fall within +/- n of your residual grey. For example, if you have a cut-off of 0.3, color residual values that are within -0.3 and +0.3 grey
+Color metabolites that fall outside this range salmon.
+What are these metabolites. How do you explain the trends you see on either direction of the plot?
+Pick any 6 metabolites that fall outside this range and generate a line plot that spans from their 0h treatment to their 8h and 24hr.
+What can you say about the plots you see?
+
+
+
+
+Task Code 2.4:
+Biochemistry & Oncology
+Proteins structures are known to be strongly connected to their functions. However, at the amino acid level, not all amino acids contribute to structure and function equally. Galardini and colleagues decided to investigate the impact of all possible individual, non synonymous nonsense mutations on the structure and function of protein.
+The functional impact was computed as SIFT scores and the structural impact was calculated as FoldX Score (in kCal/mol).
+Dataset Here:
+SIFT Dataset
+FoldX Dataset
+Task
+Import both sift and foldx datasets; in both datasets, create a column specific_Protein_aa which will be a cantenation of the Protein and Amino_acid columns such that If you have Protein A5A607 and Amino_acid E63D, you have specific_Protein_aa A5A607_E63D
+Using the specific_Protein_aa column, merge sift and foldx dataset into one final dataframe.
+According to the authors;
+A SIFT Score below 0.05 is deleterious
+A FoldX score greater than 2 kCal/mol is deleterious
+Using the criteria above, Find all mutations that have a SIFT score below 0.05 and FoldX Score above 2 (i.e: Mutations that affect both structure and function)
+Study the amino acid substitution nomenclature
+Investigate for the amino acid that has the most functional and structural impact
+Hint: Using the amino acid column, find a way to select the first amino acid. Solution here
+Generate a frequency table for all the amino acids
+Using the amino frequency table above, generate a barplot and pie chart to represent the frequency of the amino acids.
+Briefly describe the amino acid with the highest impact on protein structure and function
+What can you say about the structural property and functional property of amino acids with more than 100 occurrences.
+
+Answer
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+df = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/2025_project_collection/refs/heads/main/Python/Dataset/mcgc.tsv', sep='\t')
+df.head(100)
+
+meta = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/2025_project_collection/refs/heads/main/Python/Dataset/mcgc_METADATA.txt', sep='\t')
+meta
+
+plt.figure(figsize=(10, 10))
+
+def plot_line(strain):
+    strain_data = meta[meta['Strain'] == strain].drop('Strain', axis=1)
+    for column_value in strain_data.values[0]:
+        sns.lineplot(x=df['time'], y=df[column_value], label=column_value)
+        plt.legend(title=f"{strain} lines")
+
+plt.subplot(2, 2, 1)
+plot_line('Strain1_Rep1')
+plot_line('Strain1_Rep2')
+plt.title('Strain1')
+
+plt.subplot(2, 2, 2)
+plot_line('Strain2_Rep1')
+plot_line('Strain2_Rep2')
+plt.title('Strain2')
+
+plt.subplot(2, 2, 3)
+plot_line('Strain3_Rep1')
+plt.title('Strain3')
+
+
+plt.xlabel("Time")
+plt.ylabel("Value")
+plt.grid(True)
+plt.show()
+
+def time_capacity(strain):
+    strain_data = meta[meta['Strain'] == strain].drop('Strain', axis=1)
+    for column_value in strain_data.values[0]:
+      min_diff = abs(df[column_value]- (df[column_value].max()*0.8)).idxmin()
+      max_value = df.loc[min_diff]
+
+      print(max_value)
+
+time_capacity("Strain1_Rep1")
+
+sift = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/sift.tsv', sep='\t', header=0, names=['Protein', 'Amino_Acid', 'sift_Score'])
+foldx = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/datasets/foldX.tsv', sep='\t', header=0, names=['Protein', 'Amino_Acid', 'foldX_Score'])
+sift.head()
+
+sift['merged'] = sift['Protein'] + '_' + sift['Amino_Acid']
+foldx['merged'] = foldx['Protein'] + '_' + foldx['Amino_Acid']
+df = pd.merge(sift, foldx, on=['merged', 'Protein', 'Amino_Acid'])
+df.head()
+
+df_mut = pd.DataFrame()
+for i in df.values:
+  if i[2] < 0.05 and i[4] > 2:
+    df_mut = pd.concat([df_mut, df.loc[(df['foldX_Score'] == i[4]) & (df['sift_Score'] == i[2])]])
+
+df_mut.head().sort_values(by='Protein', ascending=False)
+
+df_mut['first_amio'] = df_mut['Amino_Acid'].str[0]
+frequency = df_mut['first_amio'].value_counts()
+plt.figure(figsize=(10, 10))
+ax = sns.barplot(x=frequency.index, y=frequency.values, palette = 'viridis')
+for i in ax.containers:
+    ax.bar_label(i,)
+plt.xlabel('Amino Acid')
+plt.ylabel('Frequency')
+plt.title('Frequency of Changed Amino Acid')
+plt.show()
+
+plt.figure(figsize=(10, 10))
+plt.pie(frequency, labels=frequency.index, autopct='%1.1f%%', colors=sns.color_palette('pastel'))
+plt.title('Frequency of Changed Amino Acid')
+plt.show()
+
+'''
+### Briefly describe the amino acid with the highest impact on protein structure and function
+
+The amino acid glycine (G) has the highest impact on protein structure and function, especially when it undergoes alterations.
+Glycine is the smallest amino acid, with just a hydrogen atom as its side chain, making it highly flexible.
+It is often found in tight turns and flexible regions of proteins, where its small size allows for conformational freedom.
+
+When glycine is altered, it can significantly disrupt protein folding, stability, and function.
+Substituting glycine with a bulkier or more rigid amino acid can restrict movement, destabilize secondary structures, and impair
+interactions critical for protein activity. This makes glycine mutations particularly impactful in structural and functional domains of proteins.
+
+
+### What can you say about the structural property and functional property of amino acids with more than 100 occurences.
+
+Structural Properties
+Glycine (G) – With 1,312 alterations, glycine is the smallest amino acid and provides exceptional flexibility due to its minimal side chain (a single hydrogen atom). Its high alteration frequency suggests that even slight changes here can drastically affect local backbone flexibility, especially in tight turns or loops.
+
+Alanine (A) – With 644 occurrences, alanine is small and non-polar. Its side chain is also minimal, often serving as a structural placeholder that supports alpha-helical conformations without introducing steric hindrance.
+
+Proline (P) – Exhibiting 475 alterations, proline has a unique cyclic structure that imposes conformational rigidity and can induce kinks or breaks in alpha-helices. Its frequent alterations indicate that changes in these rigid regions can significantly affect protein folding.
+
+Leucine (L), Isoleucine (I), Valine (V) – With 739, 212, and 380 alterations respectively, these hydrophobic, branched-chain amino acids are typically found in the protein core. Their side chains contribute to the hydrophobic packing essential for protein stability. Alterations in these residues can affect the tight packing of the hydrophobic core, potentially destabilizing the overall structure.
+
+Tryptophan (W) – With 108 alterations, tryptophan is bulky and aromatic, playing a key role in maintaining protein stability through stacking and hydrophobic interactions. Its lower alteration frequency (relative to, for example, glycine) reflects its critical structural role in maintaining the integrity of protein cores.
+
+Functional Properties
+Charged Residues (Arginine, Aspartate)
+
+Arginine (R) – With 229 occurrences, arginine is a large, positively charged amino acid. It frequently participates in salt bridges and hydrogen bonding, which are vital for enzymatic active sites and protein–protein interactions.
+Aspartate (D) – With 172 occurrences, aspartate is negatively charged and is often found in active sites, where it participates in catalysis and stabilizes positive charges.
+Aromatic and Polar Residues (Tyrosine, Phenylalanine, Serine, Threonine)
+
+Tyrosine (Y) – With 172 alterations, tyrosine is aromatic and polar, serving as an important site for phosphorylation. Such modifications regulate protein activity and interactions, making tyrosine critical in signal transduction pathways.
+Phenylalanine (F) – With 170 occurrences, phenylalanine is hydrophobic and aromatic. It is key for stacking interactions and helps stabilize the protein core, affecting overall folding.
+Serine (S) and Threonine (T) – With 158 and 127 alterations respectively, these polar amino acids often participate in hydrogen bonding and can be sites of phosphorylation. Their modifications can alter protein activity, localization, or interactions .
+General Implications
+Flexibility vs. Rigidity:
+Amino acids like glycine and alanine, due to their small sizes, contribute to flexibility and minimal steric hindrance. Their high mutation rates may indicate that even minor alterations can have outsized effects on local structure and dynamics.
+
+Hydrophobic Core Integrity:
+Residues such as leucine, isoleucine, valine, and phenylalanine are critical for maintaining the hydrophobic core. Alterations in these residues may disrupt core packing, thereby affecting the overall stability and folding of the protein.
+
+Catalytic and Interaction Sites:
+Charged residues (arginine and aspartate) and phosphorylatable residues (serine, threonine, and tyrosine) play essential roles in catalytic mechanisms and regulatory interactions. Their modifications are likely to influence protein function significantly.
+
+Regulatory Roles:
+Many of these amino acids are involved in post-translational modifications (such as phosphorylation on tyrosine, serine, and threonine), which are key in regulating protein function, signaling pathways, and interactions.
+
+'''
+frequency
+
+
+
+
+
+
+Task Code 2.6:
+Transcriptomics
+This is a processed RNAseq dataset involving reading in quantitated gene expression data from an RNA-seq experiment, exploring the data using base R functions and then interpretation. The dataset contains an experiment between a diseased cell line and diseased cell lines treated with compound X. The difference in expression change between the two health status is computed as Fold change to log 2 (Log2FC) and the significance of each is computed in p-value.
+Access Dataset Here
+Task:
+Generate a volcano plot. (Hint search for volcano plot online)
+Determine the upregulated genes (Genes with Log2FC > 1 and pvalue < 0.01)
+Determine the downregulated genes (Genes with Log2FC < -1 and pvalue < 0.01)
+What are the functions of the top 5 upregulated genes and top 5 downregulated genes. (Use genecards)
+
+#ANSWER
+Task 2.6 Transcriptomics
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+#Import data from the source
+data_source ="https://gist.githubusercontent.com/stephenturner/806e31fce55a8b7175af/raw/1a507c4c3f9f1baaa3a69187223ff3d3050628d4/results.txt"
+#Read the data
+df = pd.read_csv(data_source, sep = ',', header= None)
+df.head() #reads the first few columns and rows in the data
+
+##OUTPUT-
+  Gene log2FC pvalue padj
+0	DOK6 0.51 1.861e-08 0.0003053
+1	TBX5 -2.129 5.655e-08 0.0004191
+2	SLC32A1 0.9003 7.664e-08 0.0004191
+3	IFITM1 -1.687 3.735e-06 0.006809
+4	NUP93 0.3659 3.373e-06 0.006809
+
+# Create the -log10(pvalue)
+new_df['-log10(pvalue)'] = -np.log10(new_df['pvalue'])
+
+# Create a column to color code the points based on significance
+# Typically uses both p-value and fold change thresholds
+new_df['Significant'] = 'Not Significant'
+new_df.loc[(new_df['pvalue'] < 0.05) & (new_df['log2FoldChange'] > 1), 'Significant'] = 'Upregulated'
+new_df.loc[(new_df['pvalue'] < 0.05) & (new_df['log2FoldChange'] < -1), 'Significant'] = 'Downregulated'
+
+# Create the volcano plot
+plt.figure(figsize=(10, 8))
+sns.scatterplot(data=new_df, 
+                x='log2FoldChange', 
+                y='-log10(pvalue)',
+                hue='Significant',
+                palette={'Upregulated': 'red', 
+                        'Downregulated': 'blue', 
+                        'Not Significant': 'grey'},
+                alpha=0.6)
+# Add labels and title
+plt.xlabel('log2 Fold Change')
+plt.ylabel('-log10(p-value)')
+plt.title('Volcano Plot')
+
+#Add a horizontal line for p-value threshold (e.g., 0.05)
+plt.axhline(y=-np.log10(0.05), color='red', linestyle='--', alpha=0.5)
+# Add vertical lines for log2FoldChange thresholds
+plt.axvline(x=1, color='blue', linestyle='--', alpha=0.5)
+plt.axvline(x=-1, color='blue', linestyle='--', alpha=0.5)  # Changed empty string to 'blue'
+
+# Add gene labels for significant genes
+for idx, row in new_df[new_df['Significant'] != 'Not Significant'].iterrows():
+    plt.annotate(row.name, xy=(row['log2FoldChange'], row['-log10(pvalue)']),xytext=(5, 5), textcoords='offset points',
+                fontsize=8)
+
+plt.show()
+
+#Print summary of significant genes
+print("\nSummary of differential expression:")
+print(new_df['Significant'].value_counts())
+# Print detailed information about differentially expressed genes
+print("\n=== UPREGULATED GENES ===")
+upregulated = new_df[new_df['Significant'] == 'Upregulated'].sort_values('pvalue')
+print("\nNumber of upregulated genes:", len(upregulated))
+print("\nTop upregulated genes (sorted by p-value):")
+print(upregulated[['log2FoldChange', 'pvalue']].head())
+
+print("\n=== DOWNREGULATED GENES ===")
+downregulated = new_df[new_df['Significant'] == 'Downregulated'].sort_values('pvalue')
+print("\nNumber of downregulated genes:", len(downregulated))
+print("\nTop downregulated genes (sorted by p-value):")
+print(downregulated[['log2FoldChange', 'pvalue']].head())
+
+
+##OUTPUT -
+Summary of differential expression:
+Significant
+Not Significant    16296
+Downregulated         91
+Upregulated           19
+Name: count, dtype: int64
+
+=== UPREGULATED GENES ===
+
+Number of upregulated genes: 19
+
+Top upregulated genes (sorted by p-value):
+    log2FoldChange    pvalue
+6            1.534  0.000003
+11           1.181  0.000011
+15           1.050  0.000015
+16           1.137  0.000022
+21           1.540  0.000056
+
+=== DOWNREGULATED GENES ===
+
+Number of downregulated genes: 91
+
+Top downregulated genes (sorted by p-value):
+    log2FoldChange        pvalue
+2           -2.129  5.655000e-08
+8           -1.425  2.390000e-06
+9           -1.052  3.213000e-06
+4           -1.687  3.735000e-06
+10          -1.658  8.973000e-06
+
+###Function of Top 5 Upregulated Genes Using Gene Cards,
+#1. EMILIN2: May be responsible for anchoring smooth muscle cells to elastic fibers, and may be involved not only in the formation of the elastic fiber, but also in the processes that regulate vessel assembly.
+Has cell adhesive capacity. 
+#2. POU3F4 : Probable transcription factor which exert its primary action widely during early neural development and in a very limited set of neurons in the mature brain. Expressed in Rathke pouch,at an early stage of pituitary development and in a subset of adult anterior pituitary cells that express POMC,involved in mesenchymal-mesenchymal signaling for the development of inner ear 
+#3. LOC285954: No function on Gene Cards
+#4. VEPH1: Interacts with TGF-beta receptor type-1 (TGFBR1) and inhibits dissociation of activated SMAD2 from TGFBR1, impeding its nuclear accumulation and resulting in impaired TGF-beta signaling.
+May also affect FOXO, Hippo and Wnt signaling.
+#5. DTHD1: May be involved in retinal eye disease and hepatocellular carcinoma
+
+###Function of the Top 5 Downregulated Genes Using Gene Card
+#1. TBX5: DNA-binding protein that regulates the transcription of several genes and is involved in heart development and limb pattern formation. Murine T-box gene Tbx5 (T,brachyury)homolog,putative transcription factor,likely expressed in developing limb bud and heart in mice,involved in developmental regulation,pairing with TBX3,homolog to Drosophila optomotor-blind gene (omb),involved in optic lobe and wing development
+#2. LAMA2: Binding to cells via a high affinity receptor, laminin is thought to mediate the attachment, migration and organization of cells into tissues during embryonic development by interacting with other extracellular matrix components
+#3. CAV2: May act as a scaffolding protein within caveolar membranes.
+Interacts directly with G-protein alpha subunits and can functionally regulate their activity.
+Acts as an accessory protein in conjunction with CAV1 in targeting to lipid rafts and driving caveolae formation.
+The Ser-36 phosphorylated form has a role in modulating mitosis in endothelial cells.
+Positive regulator of cellular mitogenesis of the MAPK signaling pathway.
+Required for the insulin-stimulated nuclear translocation and activation of MAPK1 and STAT3, and the subsequent regulation of cell cycle progression
+#4. IFITM1: IFN-induced antiviral protein which inhibits the entry of viruses to the host cell cytoplasm, permitting endocytosis, but preventing subsequent viral fusion and release of viral contents into the cytosol.
+Active against multiple viruses, including influenza A virus, SARS coronaviruses (SARS-CoV and SARS-CoV-2), Marburg virus (MARV), Ebola virus (EBOV), Dengue virus (DNV), West Nile virus (WNV), human immunodeficiency virus type 1 (HIV-1) and hepatitis C virus (HCV)
+Can inhibit: influenza virus hemagglutinin protein-mediated viral entry, MARV and EBOV GP1,2-mediated viral entry and SARS-CoV and SARS-CoV-2 S protein-mediated viral entry.
+Also implicated in cell adhesion and control of cell growth and migration.
+#5. TNN: Expressed in most mammary tumors, may facilitate tumorigenesis by supporting the migratory behavior of breast cancer cells.
+In tumors, stimulates angiogenesis by elongation, migration and sprouting of endothelial cells.		
+
+
+
+
+
+
+
+
+Task Code 2.7:
+Public Health
+NHANES is a program run by the CDC to assess the health and nutritional status of adults and children in the US. It combines survey questions and physical examinations, including medical and physiological measurements and laboratory tests, and examines a representative sample of about 5,000 people each year. The data is used to determine the prevalence of diseases and risk factors, establish national standards, and support epidemiology studies and health sciences research. This information helps to develop public health policy, design health programs and services, and expand the nation's health knowledge.
+Dataset here
+Data Dictionary
+Tasks:
+Process all NA (either by deleting or by converting to zero) {Hard :fire:}
+Visualize the distribution of BMI, Weight, Weight in pounds (weight *2.2) and Age with an histogram.
+What’s the mean 60-second pulse rate for all participants in the data?
+73.63382
+What’s the range of values for diastolic blood pressure in all participants? (Hint: see help for min(), max()).
+0-116
+What’s the variance and standard deviation for income among all participants?
+Visualize the relationship between weight and height ?
+Color the points by
+gender
+diabetes
+smoking status
+Conduct t-test between the following variables and make conclusions on the relationship between them based on P-Value
+Age and Gender
+BMI and Diabetes
+Alcohol Year and Relationship Status
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+df = pd.read_csv('https://raw.githubusercontent.com/HackBio-Internship/public_datasets/main/R/nhanes.csv', sep=',')
+df['nPregnancies'] = df['nPregnancies'].replace(np.nan, 0)
+df['nBabies'] = df['nBabies'].replace(np.nan, 0)
+df['Education'] = df['Education'].replace(np.nan, 'Unkown')
+df['MaritalStatus'] = df['MaritalStatus'].replace(np.nan, 'Unkown')
+df['RelationshipStatus'] = df['RelationshipStatus'].replace(np.nan, 'Unkown')
+df['SmokingStatus'] = df['SmokingStatus'].replace(np.nan, 'Unkown')
+df['DiabetesAge'] = df['DiabetesAge'].replace(np.nan, 'Unkown')
+df['SleepHrsNight'] = df['SleepHrsNight'].replace(np.nan, 'Unkown')
+df['Work'] = df['Work'].replace(np.nan, 'Unkown')
+df['AlcoholYear'] = df['AlcoholYear'].replace(np.nan, 0)
+df['AlcoholDay'] = df['AlcoholDay'].replace(np.nan, 0)
+df['PhysActiveDays'] = df['PhysActiveDays'].replace(np.nan, 0)
+df['PhysActive'] = df['PhysActive'].replace(np.nan, 'Unkown')
+df['Income'] = df['Income'].replace(np.nan, 0)
+df['Poverty'] = df['Poverty'].replace(np.nan, 0)
+df['WeightPounds'] = df['Weight']*2.2
+df.head()
+
+df.dropna(inplace=True)
+df.info()
+df.shape
+
+plt.figure(figsize=(12,12))
+plt.subplot(2,2,1)
+sns.histplot(df['BMI'])
+plt.title('BMI Distribution')
+plt.subplot(2,2,2)
+sns.histplot(df['Weight'])
+plt.title('Weight Distribution')
+plt.subplot(2,2,3)
+sns.histplot(df['WeightPounds'])
+plt.title('WeightPounds Distribution')
+plt.subplot(2,2,4)
+sns.histplot(df['Age'])
+plt.title('Age Distribution')
+plt.show()
+
+print(df['Pulse'].mean())
+print(df['BPDia'].min(),'-', df['BPDia'].max())
+print(df['Income'].var(), '-', df['Income'].std())
+
+
+plt.figure(figsize=(12,12))
+plt.subplot(2,2,1)
+sns.scatterplot(data=df, x='Weight', y='Height', hue='Gender')
+plt.title('Weight vs Height by Gender')
+plt.subplot(2,2,2)
+sns.scatterplot(data=df, x='Weight', y='Height', hue='Diabetes')
+plt.title('Weight vs BMI by Diabetic Status')
+plt.subplot(2,2,3)
+sns.scatterplot(data=df, x='Weight', y='Height', hue='SmokingStatus')
+plt.title('Weight vs Height by Smoking Status')
+plt.show()
+
+from scipy import stats
+df['Gender'] = pd.get_dummies(df['Gender'], drop_first=True)
+df['Diabetes'] = pd.get_dummies(df['Diabetes'], drop_first=True)
+df= df[df['RelationshipStatus'] != 'Unkown']
+df['RelationshipStatus'] = pd.get_dummies(df['RelationshipStatus'], drop_first=True)
+
+t_stat, p_value = stats.ttest_ind(df['Age'], df['Gender'])
+print(t_stat, p_value)
+t_stat, p_value = stats.ttest_ind(df['AlcoholYear'], df['RelationshipStatus'])
+print(t_stat, p_value)
+t_stat, p_value = stats.ttest_ind(df['BMI'], df['Diabetes'])
+print(t_stat, p_value)
+
 
