@@ -52,7 +52,8 @@ ABC = translate(DNA_sequence)
 print(ABC)
 
 
-# 2. Write a function that simulates and generates a logistic population growth curve. Your function should include 2 extra parameters that randomize the length of the lag phase and the exponential phase [See population curve here] . Most living populations follow a logistic population growth. Therefore, your growth curve can be: Population Size vs Time, Cell density vs Time, OD vs Time, CFU vs Time, etc
+# 2. Write a function that simulates and generates a logistic population growth curve. Your function should include 2 extra parameters that randomize the length of the lag phase and the exponential phase [See population curve here].
+Most living populations follow a logistic population growth. Therefore, your growth curve can be: Population Size vs Time, Cell density vs Time, OD vs Time, CFU vs Time, etc
 Using your function, generate a dataframe with 100 different growth curves.
 
 def logistic_growth(time, K=1500, r=0.5, N0=10, lag_variation=8, exp_variation=12):
